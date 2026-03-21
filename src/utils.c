@@ -1,3 +1,8 @@
+#include <openssl/sha.h>
+
+#include <stdlib.h>
+#include <string.h>
+
 char* join_strings(char* strings[], size_t length)
 {
     size_t final_length = 0;

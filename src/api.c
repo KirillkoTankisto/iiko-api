@@ -1,13 +1,12 @@
 #include <curl/curl.h>
 #include <json-c/json.h>
-#include <json-c/json_object.h>
 #include <openssl/sha.h>
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#include "utils.c"
+#include "../include/utils.h"
 
 struct memory
 {
