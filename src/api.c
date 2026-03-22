@@ -30,8 +30,10 @@ size_t write_to_string(char* input, size_t size, size_t nmemb, void* output)
     return realsize;
 }
 
-char* curl_get(const char* url, CURL* curl)
+char* curl_get(CURL* curl, char* url)
 {
+    puts(url);
+
     struct memory mem;
     mem.response = NULL;
     mem.size = 0;
@@ -46,6 +48,8 @@ char* curl_get(const char* url, CURL* curl)
     curl_easy_perform(curl);
 
     curl_easy_reset(curl);
+
+    puts(mem.response);
 
     exit:
     return mem.response;
@@ -69,10 +73,7 @@ struct token auth(CURL* curl, const char* address, const char* login, const char
 
     struct token iiko_token;
 
-    puts(url);
-    char* string = curl_get(url, curl);
-
-    puts(string);
+    char* string = curl_get(curl, url);
 
     iiko_token.string = string;
 
@@ -87,7 +88,7 @@ void logout(CURL* curl, const char* address, struct token iiko_token)
     char* link = create_link("https://", (char*) address, "/resto/api/logout");
     char* url = parse_args(link, args, 1);
 
-    puts(curl_get(url, curl));
+    puts(curl_get(curl, url));
 
     return;
 }
@@ -170,7 +171,7 @@ struct cashshifts_list_answer cashshifts_list_get(CURL *curl, struct token iiko_
     char* link = create_link("https://", address, "/resto/api/v2/cashshifts/list");
     char* url = parse_args(link, args, args_len);
 
-    char* response = curl_get(url, curl);
+    char* response = curl_get(curl, url);
 
     puts(response);
 
@@ -269,4 +270,17 @@ struct cashshifts_list_answer cashshifts_list_get(CURL *curl, struct token iiko_
     }
 
     return answer;
+}
+
+json_object *olap_columns_get(CURL *curl, struct token iiko_token, char* address)
+{
+    char* link = create_link("https://", address, "/resto/api/v2/reports/olap/columns");
+    char* arg = create_arg("key", iiko_token.string);
+    const char* args[] = {arg};
+
+    char* url = parse_args(link, args, 1);
+    char* response = curl_get(curl, url);
+
+    json_object *parsed = json_tokener_parse(response);
+    return parsed;
 }

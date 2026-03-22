@@ -80,3 +80,19 @@ char* create_arg(char* key, char* value)
     char* strings[3] = {key, "=", value};
     return join_strings(strings, 3);
 }
+
+#include <time.h>
+
+char *get_current_date(void)
+{
+    time_t unix_time;
+    time(&unix_time);
+
+    struct tm *timeinfo;
+    timeinfo = localtime(&unix_time);
+
+    char *buffer = malloc(32);
+    strftime(buffer, 32, "%Y-%m-%d", timeinfo);
+
+    return buffer;
+}
