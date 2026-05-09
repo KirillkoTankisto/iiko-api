@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-char* join_strings(char* strings[], size_t length)
+const char *join_strings(const char* strings[], size_t length)
 {
     size_t final_length = 0;
     for (size_t i = 0; i < length; i++)
@@ -25,10 +25,10 @@ char* join_strings(char* strings[], size_t length)
     return final_string;
 }
 
-static const char* hex =  "0123456789abcdef";
-char* calculate_sha1(char* string)
+static const char hex[] =  "0123456789abcdef";
+const char *calculate_sha1(char* string)
 {
-    char* hash = malloc(SHA_DIGEST_LENGTH);
+    const char* hash = malloc(SHA_DIGEST_LENGTH);
     SHA1((const unsigned char*) string, strlen(string), (unsigned char*) hash);
     char* text = malloc(SHA_DIGEST_LENGTH * 2 + 1);
     char* ptr = text;
@@ -44,16 +44,16 @@ char* calculate_sha1(char* string)
     return text;;
 }
 
-char* parse_args(const char* base, const char* args[], size_t args_len)
+char *parse_args(const char *base, const char *args[], size_t args_len)
 {
     size_t base_len = strlen(base);
-    char* string = malloc(512); // TODO: dynamic allocation
+    char *string = malloc(512); // TODO: dynamic allocation
 
     memcpy(string, base, base_len);
     string[base_len] = '?';
-    char* ptr = string + base_len + 1;
+    char *ptr = string + base_len + 1;
 
-    for (int i = 0; i < args_len; i++)
+    for (size_t i = 0; i < args_len; i++)
     {
         if (i > 0)  // don't put '&' at the start
         {
@@ -69,15 +69,15 @@ char* parse_args(const char* base, const char* args[], size_t args_len)
     return string;
 }
 
-char* create_link(char* first, char* middle, char* last)
+const char *create_link(char* first, char* middle, char* last)
 {
-    char* strings[3] = {first, middle, last};
+    const char *strings[3] = {first, middle, last};
     return join_strings(strings, 3);
 }
 
-char* create_arg(char* key, char* value)
+const char* create_arg(char* key, char* value)
 {
-    char* strings[3] = {key, "=", value};
+    const char *strings[3] = {key, "=", value};
     return join_strings(strings, 3);
 }
 

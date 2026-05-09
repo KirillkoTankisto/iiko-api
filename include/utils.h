@@ -1,13 +1,13 @@
 #include <stdlib.h>
 
-char* join_strings(char* strings[], size_t length);
+const char *join_strings(const char *strings[], size_t length);
 
-char* calculate_sha1(char* string);
+const char *calculate_sha1(const char *string);
 
-char* parse_args(const char* base, const char* args[], size_t args_len);
+const char *parse_args(const char *base, const char *args[], size_t args_len);
 
-char* create_link(char* first, char* middle, char* last);
+const char *create_link(const char *first, const char *middle, const char *last);
 
-char* create_arg(char* key, char* value);
+const char *create_arg(const char *key, const char *value);
 
-char* get_current_date(void);
+const char *get_current_date(void);
