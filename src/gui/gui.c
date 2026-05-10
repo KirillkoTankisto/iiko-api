@@ -1,9 +1,76 @@
 #include <curl/curl.h>
 #include <curl/easy.h>
 #include <gtk/gtk.h>
+
+#include <locale.h>
 #include <pthread.h>
+#include <string.h>
 
 #include "../../include/api.h"
+
+///
+
+typedef enum
+{
+    STR_URL,
+    STR_USERNAME,
+    STR_PASSWORD,
+    STR_LOGIN,
+    STR_FILE,
+    STR_QUIT,
+    STR_CASHSHIFTS,
+    STR_DATE_FROM,
+    STR_DATE_TO,
+    STR_REFRESH,
+    STR__COUNT,
+} str_id;
+
+typedef enum
+{
+    LANG_EN,
+    LANG_RU,
+    LANG__COUNT,
+} lang_id;
+
+static const char *translations[LANG__COUNT][STR__COUNT] =
+{
+    [LANG_EN] =
+    {
+        [STR_URL] = "Server address",
+        [STR_USERNAME] = "Username",
+        [STR_PASSWORD] = "Password",
+        [STR_LOGIN] = "Login",
+        [STR_FILE] = "File",
+        [STR_QUIT] = "Quit",
+        [STR_CASHSHIFTS] = "Cash Shifts",
+        [STR_DATE_FROM] = "Date from",
+        [STR_DATE_TO] = "Date to",
+        [STR_REFRESH] = "Refresh",
+    },
+
+    [LANG_RU] =
+    {
+        [STR_URL] = "Адрес сервера",
+        [STR_USERNAME] = "Имя пользователя",
+        [STR_PASSWORD] = "Пароль",
+        [STR_LOGIN] = "Войти",
+        [STR_FILE] = "Файл",
+        [STR_QUIT] = "Выход",
+        [STR_CASHSHIFTS] = "Кассовые смены",
+        [STR_DATE_FROM] = "Дата с",
+        [STR_DATE_TO] = "Дата по",
+        [STR_REFRESH] = "Обновить",
+    }
+};
+
+static inline const char *translate(lang_id lang, str_id str)
+{
+    return translations[lang][str];
+}
+
+#define _(current_lang, string) translate(current_lang, string)
+
+///
 
 #define SPACING 8
 
@@ -14,6 +81,7 @@ typedef struct
     CURL *curl;
     const char *address;
     const char *token;
+    lang_id current_lang;
 } global_data;
 
 ///
@@ -83,16 +151,16 @@ static GtkWidget *create_login(GtkWidget *stack, global_data *gdata)
 
     lb->stack = stack;
 
-    lb->url_label = gtk_label_new("Server address");
+    lb->url_label = gtk_label_new(_(gdata->current_lang, STR_URL));
     lb->url = gtk_entry_new();
 
-    lb->login_label = gtk_label_new("Username");
+    lb->login_label = gtk_label_new(_(gdata->current_lang, STR_USERNAME));
     lb->login = gtk_entry_new();
 
-    lb->password_label = gtk_label_new("Password");
+    lb->password_label = gtk_label_new(_(gdata->current_lang, STR_PASSWORD));
     lb->password = gtk_password_entry_new();
 
-    lb->button = gtk_button_new_with_label("Login");
+    lb->button = gtk_button_new_with_label(_(gdata->current_lang, STR_LOGIN));
     gtk_widget_set_margin_top(lb->button, SPACING * 3);
 
     gtk_box_append(GTK_BOX(box), lb->url_label);
@@ -183,7 +251,7 @@ static datepicker_row create_datepicker(const char *label)
     return row;
 }
 
-static GtkWidget *create_shifts()
+static GtkWidget *create_shifts(global_data *gdata)
 {
     GtkWidget *grid = gtk_grid_new();
     gtk_grid_set_column_spacing(GTK_GRID(grid), SPACING);
@@ -191,13 +259,13 @@ static GtkWidget *create_shifts()
 
     GtkWidget *box = gtk_box_new(GTK_ORIENTATION_VERTICAL, SPACING);
 
-    datepicker_row date_from = create_datepicker("Date from");
-    datepicker_row date_to = create_datepicker("Date to");
+    datepicker_row date_from = create_datepicker(_(gdata->current_lang, STR_DATE_FROM));
+    datepicker_row date_to = create_datepicker(_(gdata->current_lang, STR_DATE_TO));
 
     gtk_label_set_xalign(GTK_LABEL(date_from.text), 0.0);
     gtk_label_set_xalign(GTK_LABEL(date_to.text), 0.0);
 
-    GtkWidget *button = gtk_button_new_with_label("Refresh");
+    GtkWidget *button = gtk_button_new_with_label(_(gdata->current_lang, STR_REFRESH));
 
     gtk_grid_attach(GTK_GRID(grid), date_from.text, 0, 0, 1, 1);
     gtk_grid_attach(GTK_GRID(grid), date_from.entry, 1, 0, 1, 1);
@@ -215,10 +283,10 @@ static GtkWidget *create_shifts()
 
 //
 
-static GtkWidget *create_sidebar_stack()
+static GtkWidget *create_sidebar_stack(global_data *gdata)
 {
     GtkWidget *stack = gtk_stack_new();
-    gtk_stack_add_titled(GTK_STACK(stack), create_shifts(), "shifts", "Cash shifts");
+    gtk_stack_add_titled(GTK_STACK(stack), create_shifts(gdata), "shifts", _(gdata->current_lang, STR_CASHSHIFTS));
     return stack;
 }
 
@@ -281,8 +349,8 @@ static GtkWidget *create_menubar(GtkApplication *app, GtkWidget *stack, global_d
 
     g_signal_connect(quit_action, "activate", G_CALLBACK(quit_main), qmd);
 
-    g_menu_append(menu_file, "Quit", "app.quit");
-    g_menu_append_submenu(menu, "File", G_MENU_MODEL(menu_file));
+    g_menu_append(menu_file, _(gdata->current_lang, STR_QUIT), "app.quit");
+    g_menu_append_submenu(menu, _(gdata->current_lang, STR_FILE), G_MENU_MODEL(menu_file));
 
     return gtk_popover_menu_bar_new_from_model(G_MENU_MODEL(menu));
 }
@@ -302,7 +370,7 @@ static GtkWidget *create_main(GtkApplication *app, GtkWidget *stack, global_data
     GtkWidget *box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, SPACING);
     main_view *mv = g_new(main_view, 1);
 
-    mv->stack = create_sidebar_stack();
+    mv->stack = create_sidebar_stack(gdata);
     mv->sidebar = create_sidebar(mv->stack);
     gtk_box_append(GTK_BOX(box), mv->sidebar);
     gtk_box_append(GTK_BOX(box), mv->stack);
@@ -350,17 +418,22 @@ static void activate(GtkApplication *app, gpointer gd)
 
 int gui_start(int argc, char **argv)
 {
-    GtkApplication *app;
-    int status;
-
     global_data *gdata = g_new(global_data, 1);
+
+    const char *const *langs = g_get_language_names();
+
+    if (langs && langs[0] && strncmp(langs[0], "ru", 2) == 0)
+        gdata->current_lang = LANG_RU;
+
+    else gdata->current_lang = LANG_EN;
+
     gdata->curl = curl_easy_init();
     gdata->address = NULL;
     gdata->token = NULL;
 
-    app = gtk_application_new("org.iiko.office", G_APPLICATION_DEFAULT_FLAGS);
+    GtkApplication *app = gtk_application_new("org.iiko.office", G_APPLICATION_DEFAULT_FLAGS);
     g_signal_connect(app, "activate", G_CALLBACK(activate), gdata);
-    status = g_application_run(G_APPLICATION(app), argc, argv);
+    int status = g_application_run(G_APPLICATION(app), argc, argv);
     g_object_unref(app);
 
     curl_easy_cleanup(gdata->curl);
