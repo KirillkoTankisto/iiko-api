@@ -7,7 +7,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "../../include/utils.h"
+#include "../utils/utils.h"
 
 struct memory
 {
@@ -191,7 +191,7 @@ void *cashshifts_list_get(void *ptr)
 {
     cashshifts_list_args *args = ptr;
 
-    const char *arguments[6] =
+    const char *arguments[7] =
     {
         create_arg("key", args->token),
         create_arg("openDateFrom", args->prompt.openDateFrom),
@@ -199,29 +199,29 @@ void *cashshifts_list_get(void *ptr)
         create_arg("status", args->prompt.status),
     };
 
-    size_t args_len = 4;
+    size_t args_pos = 4;
 
     if (args->prompt.departmentId)
     {
-        args_len += 1;
-        arguments[args_len] = create_arg("departmentId", args->prompt.departmentId);
+        arguments[args_pos] = create_arg("departmentId", args->prompt.departmentId);
+        args_pos += 1;
     }
 
     if (args->prompt.groupId)
     {
-        args_len += 1;
-        arguments[args_len] = create_arg("groupId", args->prompt.groupId);
+        arguments[args_pos] = create_arg("groupId", args->prompt.groupId);
+        args_pos += 1;
     }
 
     if (args->prompt.revision_from)
     {
-        args_len += 1;
         char string[32];
         snprintf(string, sizeof(string), "%d", *args->prompt.revision_from);
+        args_pos += 1;
     }
 
     const char *link = create_link("https://", args->address, "/resto/api/v2/cashshifts/list");
-    const char *url = parse_args(link, arguments, args_len);
+    const char *url = parse_args(link, arguments, args_pos);
 
     curl_get_args *cga = malloc(sizeof(curl_get_args));
     cga->curl = args->curl;
@@ -298,55 +298,30 @@ void *cashshifts_list_get(void *ptr)
         conceptionId = json_object_object_get(array_member, "conceptionId");
         pointOfSaleId = json_object_object_get(array_member, "pointOfSaleId");
 
-        int id_t = json_object_get_int(id);
-        int sessionNumber_t = json_object_get_int(sessionNumber);
-        int fiscalNumber_t = json_object_get_int(fiscalNumber);
-        int cashRegNumber_t = json_object_get_int(cashRegNumber);
-        const char *cashRegSerial_t = json_object_get_string(cashRegSerial);
-        const char *openDate_t = json_object_get_string(openDate);
-        const char *closeDate_t = json_object_get_string(closeDate);
-        const char *acceptDate_t = json_object_get_string(acceptDate);
-        const char *managerId_t = json_object_get_string(managerId);
-        const char *responsibleUserId_t = json_object_get_string(responsibleUserId);
-        int sessionStartCash_t = json_object_get_int(sessionStartCash);
-        int payOrders_t = json_object_get_int(payOrders);
-        int sumWriteoffOrders_t = json_object_get_int(sumWriteoffOrders);
-        int salesCash_t = json_object_get_int(salesCash);
-        int salesCredit_t = json_object_get_int(salesCredit);
-        int salesCard_t = json_object_get_int(salesCard);
-        int payIn_t = json_object_get_int(payIn);
-        int payOut_t = json_object_get_int(payOut);
-        int payIncome_t = json_object_get_int(payIncome);
-        int cashRemain_t = json_object_get_int(cashRemain);
-        int cashDiff_t = json_object_get_int(cashDiff);
-        const char *sessionStatus_t = json_object_get_string(sessionStatus);
-        const char *conceptionId_t = json_object_get_string(conceptionId);
-        const char *pointOfSaleId_t = json_object_get_string(pointOfSaleId);
-
-        elem.id = id_t;
-        elem.sessionNumber = sessionNumber_t;
-        elem.fiscalNumber = fiscalNumber_t;
-        elem.cashRegNumber = cashRegNumber_t;
-        elem.cashRegSerial = cashRegSerial_t;
-        elem.openDate = openDate_t;
-        elem.closeDate = closeDate_t;
-        elem.acceptDate = acceptDate_t;
-        elem.managerId = managerId_t;
-        elem.responsibleUserId = responsibleUserId_t;
-        elem.sessionStartCash = sessionStartCash_t;
-        elem.payOrders = payOrders_t;
-        elem.sumWriteoffOrders = sumWriteoffOrders_t;
-        elem.salesCash = salesCash_t;
-        elem.salesCredit = salesCredit_t;
-        elem.salesCard = salesCard_t;
-        elem.payIn = payIn_t;
-        elem.payOut = payOut_t;
-        elem.payIncome = payIncome_t;
-        elem.cashRemain = cashRemain_t;
-        elem.cashDiff = cashDiff_t;
-        elem.sessionStatus = sessionStatus_t;
-        elem.conceptionId = conceptionId_t;
-        elem.pointOfSaleId = pointOfSaleId_t;
+        elem.id = json_object_get_int(id);
+        elem.sessionNumber = json_object_get_int(sessionNumber);
+        elem.fiscalNumber = json_object_get_int(fiscalNumber);
+        elem.cashRegNumber = json_object_get_int(cashRegNumber);
+        elem.cashRegSerial = json_object_get_string(cashRegSerial);
+        elem.openDate = json_object_get_string(openDate);
+        elem.closeDate = json_object_get_string(closeDate);
+        elem.acceptDate = json_object_get_string(acceptDate);
+        elem.managerId = json_object_get_string(managerId);
+        elem.responsibleUserId = json_object_get_string(responsibleUserId);
+        elem.sessionStartCash = json_object_get_int(sessionStartCash);
+        elem.payOrders = json_object_get_int(payOrders);
+        elem.sumWriteoffOrders = json_object_get_int(sumWriteoffOrders);
+        elem.salesCash = json_object_get_int(salesCash);
+        elem.salesCredit = json_object_get_int(salesCredit);
+        elem.salesCard = json_object_get_int(salesCard);
+        elem.payIn = json_object_get_int(payIn);
+        elem.payOut = json_object_get_int(payOut);
+        elem.payIncome = json_object_get_int(payIncome);
+        elem.cashRemain = json_object_get_int(cashRemain);
+        elem.cashDiff = json_object_get_int(cashDiff);
+        elem.sessionStatus = json_object_get_string(sessionStatus);
+        elem.conceptionId = json_object_get_string(conceptionId);
+        elem.pointOfSaleId = json_object_get_string(pointOfSaleId);
 
         answer->elements[index] = elem;
     }

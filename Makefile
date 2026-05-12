@@ -8,29 +8,23 @@ CLIBS = $(shell pkg-config --libs json-c libcurl gtk4 openssl)
 
 CCC = $(CC) $(CFLAGS) $(INC)
 
-SRC_FILES = api/api.c gui/gui.c utils/utils.c main.c
-BUILD_FILES = api.o gui.o utils.o main.o
+SRC_FILES = $(SRC)/api/api.c $(SRC)/gui/cashshifts.c $(SRC)/gui/common.c $(SRC)/gui/gui.c $(SRC)/gui/login.c $(SRC)/gui/main_view.c $(SRC)/utils/utils.c $(SRC)/main.c
+OBJ_FILES = $(BUILD)/api/api.o $(BUILD)/gui/cashshifts.o $(BUILD)/gui/common.o $(BUILD)/gui/gui.o $(BUILD)/gui/login.o $(BUILD)/gui/main_view.o $(BUILD)/utils/utils.o $(BUILD)/main.o
 
 all: $(BUILD) compile
 
 compile: $(BUILD)/iiko-office
 
 # Final executable
-$(BUILD)/iiko-office: $(BUILD)/api.o $(BUILD)/gui.o $(BUILD)/utils.o $(BUILD)/main.o
+$(BUILD)/iiko-office: $(OBJ_FILES)
 	$(CCC) -o $@ $^ $(CLIBS)
 
 ### Components
-$(BUILD)/api.o: $(SRC)/api/api.c
-	$(CCC) -c -o $@ $^
 
-$(BUILD)/gui.o: $(SRC)/gui/gui.c
-	$(CCC) -c -o $@ $^
+$(BUILD)/%.o: $(SRC)/%.c
+	dir=`dirname "$@"` && mkdir -p "$$dir"
+	$(CCC) -c -o $@ $<
 
-$(BUILD)/utils.o: $(SRC)/utils/utils.c
-	$(CCC) -c -o $@ $^
-
-$(BUILD)/main.o: $(SRC)/main.c
-	$(CCC) -c -o $@ $^
 ###
 
 # Build directory
