@@ -22,18 +22,17 @@ typedef struct
     GtkWidget *SessionNumber;
 } row;
 
-static void add_row(size_t *rnum, row r, GtkGrid *g)
+static void add_row(size_t rnum, row r, GtkGrid *g)
 {
-    gtk_grid_attach(g, r.OpenDate, 0, *rnum, 1, 1);
-    gtk_grid_attach(g, r.CloseDate, 1, *rnum, 1, 1);
-    gtk_grid_attach(g, r.AcceptDate, 2, *rnum, 1, 1);
-    gtk_grid_attach(g, r.SessionStatus, 3, *rnum, 1, 1);
-    gtk_grid_attach(g, r.SalesSum, 4, *rnum, 1, 1);
-    gtk_grid_attach(g, r.SalesCash, 5, *rnum, 1, 1);
-    gtk_grid_attach(g, r.SalesCard, 6, *rnum, 1, 1);
-    gtk_grid_attach(g, r.SalesCredit, 7, *rnum, 1, 1);
-    gtk_grid_attach(g, r.SessionNumber, 8, *rnum, 1, 1);
-    *rnum += 1;
+    gtk_grid_attach(g, r.OpenDate, 0, rnum, 1, 1);
+    gtk_grid_attach(g, r.CloseDate, 1, rnum, 1, 1);
+    gtk_grid_attach(g, r.AcceptDate, 2, rnum, 1, 1);
+    gtk_grid_attach(g, r.SessionStatus, 3, rnum, 1, 1);
+    gtk_grid_attach(g, r.SalesSum, 4, rnum, 1, 1);
+    gtk_grid_attach(g, r.SalesCash, 5, rnum, 1, 1);
+    gtk_grid_attach(g, r.SalesCard, 6, rnum, 1, 1);
+    gtk_grid_attach(g, r.SalesCredit, 7, rnum, 1, 1);
+    gtk_grid_attach(g, r.SessionNumber, 8, rnum, 1, 1);
 
     return;
 }
@@ -48,7 +47,7 @@ static void refresh_cashshifts_table(GtkButton *button, gpointer udata)
     if (date_from && date_to)
     {
         cashshifts_list_args *args = g_new(cashshifts_list_args, 1);
-        struct cashshifts_list prompt =
+        cashshifts_list prompt =
         {
             .openDateFrom = date_from,
             .openDateTo = date_to,
@@ -66,7 +65,7 @@ static void refresh_cashshifts_table(GtkButton *button, gpointer udata)
         pthread_t cashshifts_thread;
         pthread_create(&cashshifts_thread, NULL, cashshifts_list_get, args);
 
-        struct cashshifts_list_answer *result = NULL;
+        cashshifts_list_answer *result = NULL;
         pthread_join(cashshifts_thread, (void **) &result);
 
         if (result)
@@ -94,26 +93,70 @@ static void refresh_cashshifts_table(GtkButton *button, gpointer udata)
                 .SessionNumber = gtk_label_new(_(entries->gdata->current_lang, STR_SESSIONNUMBER)),
             };
 
-            add_row(&row_pos, header, GTK_GRID(entries->cashshifts_table));
+            gtk_widget_add_css_class(header.OpenDate, "table-cell");
+            gtk_widget_add_css_class(header.CloseDate, "table-cell");
+            gtk_widget_add_css_class(header.AcceptDate, "table-cell");
+            gtk_widget_add_css_class(header.SessionStatus, "table-cell");
+            gtk_widget_add_css_class(header.SalesSum, "table-cell");
+            gtk_widget_add_css_class(header.SalesCash, "table-cell");
+            gtk_widget_add_css_class(header.SalesCard, "table-cell");
+            gtk_widget_add_css_class(header.SalesCredit, "table-cell");
+            gtk_widget_add_css_class(header.SessionNumber, "table-cell");
+
+            add_row(row_pos, header, GTK_GRID(entries->cashshifts_table));
+            row_pos++;
 
             for (size_t i = 0; i < result->size; i++)
             {
                 row element;
 
-                struct cashshifts_list_answer_element e = result->elements[i];
+                cashshifts_list_answer_element e = result->elements[i];
 
-                element.OpenDate = gtk_label_new(e.openDate);
-                element.CloseDate = gtk_label_new(e.closeDate);
-                element.AcceptDate = gtk_label_new(e.acceptDate);
-                element.SessionStatus = gtk_label_new(e.acceptDate);
+                element.OpenDate = gtk_label_new(reformat_date(e.openDate, entries->gdata->current_lang));
+                element.CloseDate = gtk_label_new(reformat_date(e.closeDate, entries->gdata->current_lang));
+                element.AcceptDate = gtk_label_new(reformat_date(e.acceptDate, entries->gdata->current_lang));
+                element.SessionStatus = gtk_label_new(reformat_date(e.acceptDate, entries->gdata->current_lang));
                 element.SalesSum = gtk_label_new(g_strdup_printf("%i", e.salesCard + e.salesCash + e.salesCredit));
                 element.SalesCash = gtk_label_new(g_strdup_printf("%i", e.salesCash));
                 element.SalesCard = gtk_label_new(g_strdup_printf("%i", e.salesCard));
                 element.SalesCredit = gtk_label_new(g_strdup_printf("%i", e.salesCredit));
                 element.SessionNumber = gtk_label_new(g_strdup_printf("%i", e.sessionNumber));
 
-                add_row(&row_pos, element, GTK_GRID(entries->cashshifts_table));
+                gtk_label_set_xalign(GTK_LABEL(element.OpenDate), 0.0);
+                gtk_label_set_xalign(GTK_LABEL(element.CloseDate), 0.0);
+                gtk_label_set_xalign(GTK_LABEL(element.AcceptDate), 0.0);
+                gtk_label_set_xalign(GTK_LABEL(element.SessionStatus), 0.0);
+                gtk_label_set_xalign(GTK_LABEL(element.SalesSum), 1.0);
+                gtk_label_set_xalign(GTK_LABEL(element.SalesCash), 1.0);
+                gtk_label_set_xalign(GTK_LABEL(element.SalesCard), 1.0);
+                gtk_label_set_xalign(GTK_LABEL(element.SalesCredit), 1.0);
+                gtk_label_set_xalign(GTK_LABEL(element.SessionNumber), 1.0);
+
+                gtk_label_set_selectable(GTK_LABEL(element.OpenDate), TRUE);
+                gtk_label_set_selectable(GTK_LABEL(element.CloseDate), TRUE);
+                gtk_label_set_selectable(GTK_LABEL(element.AcceptDate), TRUE);
+                gtk_label_set_selectable(GTK_LABEL(element.SessionStatus), TRUE);
+                gtk_label_set_selectable(GTK_LABEL(element.SalesSum), TRUE);
+                gtk_label_set_selectable(GTK_LABEL(element.SalesCash), TRUE);
+                gtk_label_set_selectable(GTK_LABEL(element.SalesCard), TRUE);
+                gtk_label_set_selectable(GTK_LABEL(element.SalesCredit), TRUE);
+                gtk_label_set_selectable(GTK_LABEL(element.SessionNumber), TRUE);
+
+                gtk_widget_add_css_class(element.OpenDate, "table-cell");
+                gtk_widget_add_css_class(element.CloseDate, "table-cell");
+                gtk_widget_add_css_class(element.AcceptDate, "table-cell");
+                gtk_widget_add_css_class(element.SessionStatus, "table-cell");
+                gtk_widget_add_css_class(element.SalesSum, "table-cell");
+                gtk_widget_add_css_class(element.SalesCash, "table-cell");
+                gtk_widget_add_css_class(element.SalesCard, "table-cell");
+                gtk_widget_add_css_class(element.SalesCredit, "table-cell");
+                gtk_widget_add_css_class(element.SessionNumber, "table-cell");
+
+                add_row(row_pos, element, GTK_GRID(entries->cashshifts_table));
+                row_pos++;
             }
+
+            cashshifts_list_destroy(result);
         }
     }
 
@@ -123,8 +166,6 @@ static void refresh_cashshifts_table(GtkButton *button, gpointer udata)
 static GtkWidget *create_cashshifts_table()
 {
     GtkWidget *grid = gtk_grid_new();
-    gtk_grid_set_column_spacing(GTK_GRID(grid), SPACING);
-    gtk_grid_set_row_spacing(GTK_GRID(grid), SPACING);
 
     return grid;
 }

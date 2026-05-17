@@ -8,6 +8,7 @@
 
 typedef enum
 {
+    STR_EMPTY,
     STR_URL,
     STR_USERNAME,
     STR_PASSWORD,
@@ -17,6 +18,7 @@ typedef enum
     STR_CASHSHIFTS,
     STR_DATE_FROM,
     STR_DATE_TO,
+    STR_CLOSE,
     STR_REFRESH,
     STR_OPENDATE,
     STR_CLOSEDATE,
@@ -68,5 +70,9 @@ typedef struct
 } datepicker_row;
 
 datepicker_row create_datepicker(const char *label);
+
+const char *reformat_date(const char *str, lang_id current_lang);
+
+void init_css(GdkDisplay *display);
 
 #endif

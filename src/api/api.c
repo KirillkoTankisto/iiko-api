@@ -15,7 +15,7 @@ struct memory
     size_t size;
 };
 
-size_t write_to_string(char *input, size_t size, size_t nmemb, void* output)
+static size_t write_to_string(char *input, size_t size, size_t nmemb, void* output)
 {
     size_t realsize = size * nmemb;
     struct memory *mem = (struct memory*) output;
@@ -43,7 +43,7 @@ typedef struct
     int status;
 } curl_get_result;
 
-void *curl_get(void *ptr)
+static void *curl_get(void *ptr)
 {
     curl_get_args *args = ptr;
 
@@ -59,7 +59,7 @@ void *curl_get(void *ptr)
     curl_easy_setopt(curl, CURLOPT_URL, url);
     curl_easy_setopt(curl, CURLOPT_USERAGENT, "curl/");
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_to_string);
-    curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void*)&mem);
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void*) &mem);
 
     curl_get_result *result = malloc(sizeof(curl_get_result));
 
@@ -85,7 +85,6 @@ void *auth(void *ptr)
     auth_args *args = ptr;
 
     const char *link = create_link("https://", args->address, "/resto/api/auth");
-
 
     const char *login_arg = create_arg("login", args->login);
     const char *pass_arg = create_arg("pass", calculate_sha1(args->pass));
@@ -135,7 +134,7 @@ void *logout(void *ptr)
     pthread_exit(result);
 }
 
-struct cashshifts_list
+typedef struct
 {
     char *openDateFrom;
     char *openDateTo;
@@ -143,9 +142,9 @@ struct cashshifts_list
     char *groupId;
     char *status;
     int *revision_from;
-};
+} cashshifts_list;
 
-struct cashshifts_list_answer_element
+typedef struct
 {
     int id;
     int sessionNumber;
@@ -171,21 +170,36 @@ struct cashshifts_list_answer_element
     const char *sessionStatus;
     const char *conceptionId;
     const char *pointOfSaleId;
-};
+} cashshifts_list_answer_element;
 
-struct cashshifts_list_answer
+typedef struct
 {
-    struct cashshifts_list_answer_element* elements;
+    cashshifts_list_answer_element *elements;
     size_t size;
-};
+} cashshifts_list_answer;
 
 typedef struct
 {
     CURL *curl;
     char *token;
     char *address;
-    struct cashshifts_list prompt;
+    cashshifts_list prompt;
 } cashshifts_list_args;
+
+static int cmp_cashshifts(const void *a, const void *b)
+{
+    const cashshifts_list_answer_element *aa = a;
+    const cashshifts_list_answer_element *bb = b;
+
+    if (aa->sessionNumber < bb->sessionNumber) return -1;
+    if (aa->sessionNumber > bb->sessionNumber) return 1;
+    return 0;
+}
+
+static void sort_cashshifts(cashshifts_list_answer *list)
+{
+    qsort(list->elements, list->size, sizeof(cashshifts_list_answer_element), cmp_cashshifts);
+}
 
 void *cashshifts_list_get(void *ptr)
 {
@@ -234,7 +248,7 @@ void *cashshifts_list_get(void *ptr)
 
     json_object* obj = json_tokener_parse(result->text);
 
-    struct cashshifts_list_answer *answer = malloc(sizeof(struct cashshifts_list_answer));
+    cashshifts_list_answer *answer = malloc(sizeof(cashshifts_list_answer));
 
     size_t answer_size = json_object_array_length(obj);
 
@@ -270,7 +284,7 @@ void *cashshifts_list_get(void *ptr)
 
     for (size_t index = 0; index < answer_size; index++)
     {
-        struct cashshifts_list_answer_element elem;
+        cashshifts_list_answer_element elem;
         array_member = json_object_array_get_idx(obj, index);
 
         id = json_object_object_get(array_member, "id");
@@ -326,5 +340,14 @@ void *cashshifts_list_get(void *ptr)
         answer->elements[index] = elem;
     }
 
+    sort_cashshifts(answer);
+
     pthread_exit(answer);
+}
+
+void cashshifts_list_destroy(void *ptr)
+{
+    cashshifts_list_answer *list = ptr;
+    free(list->elements);
+    free(list);
 }

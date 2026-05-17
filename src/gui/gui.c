@@ -1,8 +1,6 @@
 #include "login.h"
 #include "main_view.h"
 
-#define SPACING 8
-
 static GtkWidget *create_stack(GtkApplication *app, gpointer gd)
 {
     GtkWidget *stack = gtk_stack_new();
@@ -22,7 +20,9 @@ static void activate(GtkApplication *app, gpointer gd)
     GtkWidget *window = gtk_application_window_new(app);
     GtkWidget *stack = create_stack(app, gd);
 
-    gtk_window_set_title(GTK_WINDOW(window), "iiko-office");
+    init_css(gtk_widget_get_display(window));
+
+    gtk_window_set_title(GTK_WINDOW(window), "iiko Office");
     gtk_window_set_child(GTK_WINDOW(window), stack);
     gtk_window_present(GTK_WINDOW(window));
 
@@ -36,18 +36,23 @@ int gui_start(int argc, char **argv)
     const char *const *langs = g_get_language_names();
 
     if (langs && langs[0] && strncmp(langs[0], "ru", 2) == 0)
+    {
         gdata->current_lang = LANG_RU;
+    }
 
-    else gdata->current_lang = LANG_EN;
+    else
+    {
+        gdata->current_lang = LANG_EN;
+    }
 
     gdata->curl = curl_easy_init();
     gdata->address = NULL;
     gdata->token = NULL;
 
-    GtkApplication *app = gtk_application_new("org.iiko.office", G_APPLICATION_DEFAULT_FLAGS);
+    g_autoptr(GtkApplication) app = gtk_application_new("org.iiko.office", G_APPLICATION_DEFAULT_FLAGS);
     g_signal_connect(app, "activate", G_CALLBACK(activate), gdata);
+
     int status = g_application_run(G_APPLICATION(app), argc, argv);
-    g_object_unref(app);
 
     curl_easy_cleanup(gdata->curl);
 

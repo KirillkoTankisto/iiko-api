@@ -57,7 +57,7 @@ static GtkWidget *create_menubar(GtkApplication *app, GtkWidget *stack, global_d
     GMenu *menu = g_menu_new();
     GMenu *menu_file = g_menu_new();
 
-    GSimpleAction *quit_action = g_simple_action_new("quit", NULL);
+    GSimpleAction *quit_action = g_simple_action_new("to_login", NULL);
     g_action_map_add_action(G_ACTION_MAP(app), G_ACTION(quit_action));
 
     quit_main_data *qmd = g_new(quit_main_data, 1);
@@ -66,7 +66,7 @@ static GtkWidget *create_menubar(GtkApplication *app, GtkWidget *stack, global_d
 
     g_signal_connect(quit_action, "activate", G_CALLBACK(quit_main), qmd);
 
-    g_menu_append(menu_file, _(gdata->current_lang, STR_QUIT), "app.quit");
+    g_menu_append(menu_file, _(gdata->current_lang, STR_QUIT), "app.to_login");
     g_menu_append_submenu(menu, _(gdata->current_lang, STR_FILE), G_MENU_MODEL(menu_file));
 
     return gtk_popover_menu_bar_new_from_model(G_MENU_MODEL(menu));

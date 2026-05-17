@@ -31,7 +31,7 @@ void *logout(void *ptr);
 
 ///
 
-struct cashshifts_list
+typedef struct
 {
     const char *openDateFrom;
     const char *openDateTo;
@@ -39,9 +39,9 @@ struct cashshifts_list
     const char *groupId;
     const char *status;
     const int *revision_from;
-};
+} cashshifts_list;
 
-struct cashshifts_list_answer_element
+typedef struct
 {
     int id;
     int sessionNumber;
@@ -67,20 +67,22 @@ struct cashshifts_list_answer_element
     const char *sessionStatus;
     const char *conceptionId;
     const char *pointOfSaleId;
-};
+} cashshifts_list_answer_element;
 
-struct cashshifts_list_answer
+typedef struct
 {
-    struct cashshifts_list_answer_element* elements;
+    cashshifts_list_answer_element* elements;
     size_t size;
-};
+} cashshifts_list_answer;
 
 typedef struct
 {
     CURL *curl;
     const char *token;
     const char *address;
-    struct cashshifts_list prompt;
+    cashshifts_list prompt;
 } cashshifts_list_args;
 
 void *cashshifts_list_get(void *ptr);
+
+void cashshifts_list_destroy(void *list);
