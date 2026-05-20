@@ -93,7 +93,7 @@ datepicker_row create_datepicker(const char *label)
     gtk_entry_set_placeholder_text(GTK_ENTRY(cp->entry), "YYYY-MM-DD");
 
     GtkWidget *button = gtk_menu_button_new();
-    gtk_menu_button_set_icon_name(GTK_MENU_BUTTON(button), "view-calendar-symbolic");
+    gtk_menu_button_set_icon_name(GTK_MENU_BUTTON(button), "x-office-calendar");
 
     cp->popup = gtk_popover_new();
 

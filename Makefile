@@ -8,8 +8,8 @@ CLIBS = $(shell pkg-config --libs json-c libcurl gtk4 openssl)
 
 CCC = $(CC) $(CFLAGS) $(INC)
 
-SRC_FILES = $(SRC)/api/api.c $(SRC)/gui/cashshifts.c $(SRC)/gui/common.c $(SRC)/gui/gui.c $(SRC)/gui/login.c $(SRC)/gui/main_view.c $(SRC)/utils/utils.c $(SRC)/main.c
-OBJ_FILES = $(BUILD)/api/api.o $(BUILD)/gui/cashshifts.o $(BUILD)/gui/common.o $(BUILD)/gui/gui.o $(BUILD)/gui/login.o $(BUILD)/gui/main_view.o $(BUILD)/utils/utils.o $(BUILD)/main.o
+SRC_FILES = $(SRC)/api/auth.c $(SRC)/api/cashshifts_list.c $(SRC)/api/cashshifts_payments_list.c $(SRC)/api/curl_get.c $(SRC)/api/logout.c $(SRC)/gui/cashshifts.c $(SRC)/gui/common.c $(SRC)/gui/gui.c $(SRC)/gui/login.c $(SRC)/gui/main_view.c $(SRC)/utils/utils.c $(SRC)/main.c
+OBJ_FILES = $(BUILD)/api/auth.o $(BUILD)/api/cashshifts_list.o $(BUILD)/api/cashshifts_payments_list.o $(BUILD)/api/curl_get.o $(BUILD)/api/logout.o $(BUILD)/gui/cashshifts.o $(BUILD)/gui/common.o $(BUILD)/gui/gui.o $(BUILD)/gui/login.o $(BUILD)/gui/main_view.o $(BUILD)/utils/utils.o $(BUILD)/main.o
 
 all: $(BUILD) compile
 

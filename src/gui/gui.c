@@ -45,16 +45,11 @@ int gui_start(int argc, char **argv)
         gdata->current_lang = LANG_EN;
     }
 
-    gdata->curl = curl_easy_init();
     gdata->address = NULL;
     gdata->token = NULL;
 
     g_autoptr(GtkApplication) app = gtk_application_new("org.iiko.office", G_APPLICATION_DEFAULT_FLAGS);
     g_signal_connect(app, "activate", G_CALLBACK(activate), gdata);
 
-    int status = g_application_run(G_APPLICATION(app), argc, argv);
-
-    curl_easy_cleanup(gdata->curl);
-
-    return status;
+    return g_application_run(G_APPLICATION(app), argc, argv);
 }

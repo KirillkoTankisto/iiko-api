@@ -46,27 +46,24 @@ static void refresh_cashshifts_table(GtkButton *button, gpointer udata)
 
     if (date_from && date_to)
     {
-        cashshifts_list_args *args = g_new(cashshifts_list_args, 1);
         cashshifts_list prompt =
         {
             .openDateFrom = date_from,
             .openDateTo = date_to,
             .departmentId = NULL,
             .groupId = NULL,
-            .revision_from = NULL,
+            .revision_from = -1,
             .status = "ANY",
         };
 
-        args->curl = entries->gdata->curl;
-        args->token = entries->gdata->token;
-        args->address = entries->gdata->address;
-        args->prompt = prompt;
+        cashshifts_list_args args =
+        {
+            .token = entries->gdata->token,
+            .address = entries->gdata->address,
+            .prompt = prompt,
+        };
 
-        pthread_t cashshifts_thread;
-        pthread_create(&cashshifts_thread, NULL, cashshifts_list_get, args);
-
-        cashshifts_list_answer *result = NULL;
-        pthread_join(cashshifts_thread, (void **) &result);
+        cashshifts_list_answer *result = cashshifts_list_get(args);
 
         if (result)
         {
@@ -166,6 +163,10 @@ static void refresh_cashshifts_table(GtkButton *button, gpointer udata)
 static GtkWidget *create_cashshifts_table()
 {
     GtkWidget *grid = gtk_grid_new();
+    gtk_widget_set_hexpand(grid, TRUE);
+    gtk_widget_set_halign(grid, GTK_ALIGN_FILL);
+
+    gtk_grid_set_column_homogeneous(GTK_GRID(grid), TRUE);
 
     return grid;
 }
@@ -177,6 +178,7 @@ GtkWidget *create_shifts(global_data *gdata)
     gtk_grid_set_row_spacing(GTK_GRID(grid), SPACING);
 
     GtkWidget *box = gtk_box_new(GTK_ORIENTATION_VERTICAL, SPACING);
+    gtk_widget_set_hexpand(box, TRUE);
 
     datepicker_row date_from = create_datepicker(_(gdata->current_lang, STR_DATE_FROM));
     datepicker_row date_to = create_datepicker(_(gdata->current_lang, STR_DATE_TO));
@@ -194,8 +196,9 @@ GtkWidget *create_shifts(global_data *gdata)
     gtk_grid_attach(GTK_GRID(grid), date_to.entry, 1, 1, 1, 1);
     gtk_grid_attach(GTK_GRID(grid), date_to.button, 2, 1, 1, 1);
 
+    gtk_grid_attach(GTK_GRID(grid), button, 1, 2, 1, 1);
+
     gtk_box_append(GTK_BOX(box), grid);
-    gtk_box_append(GTK_BOX(box), button);
 
     GtkWidget *table_window = gtk_scrolled_window_new();
     gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(table_window), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);

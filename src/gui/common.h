@@ -45,7 +45,6 @@ extern const char *translations[LANG__COUNT][STR__COUNT];
 
 typedef struct
 {
-    CURL *curl;
     const char *address;
     const char *token;
     lang_id current_lang;

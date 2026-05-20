@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-const char *join_strings(const char* strings[], size_t length)
+char *join_strings(const char* strings[], size_t length)
 {
     size_t final_length = 0;
     for (size_t i = 0; i < length; i++)
@@ -26,7 +26,7 @@ const char *join_strings(const char* strings[], size_t length)
 }
 
 static const char hex[] =  "0123456789abcdef";
-const char *calculate_sha1(char* string)
+char *calculate_sha1(char* string)
 {
     const char* hash = malloc(SHA_DIGEST_LENGTH);
     SHA1((const unsigned char*) string, strlen(string), (unsigned char*) hash);
@@ -41,10 +41,10 @@ const char *calculate_sha1(char* string)
 
     *ptr = 0;
 
-    return text;;
+    return text;
 }
 
-char *parse_args(const char *base, const char *args[], size_t args_len)
+char *parse_args(const char *base, char *args[], size_t args_len)
 {
     size_t base_len = strlen(base);
     char *string = malloc(512); // TODO: dynamic allocation
@@ -69,30 +69,24 @@ char *parse_args(const char *base, const char *args[], size_t args_len)
     return string;
 }
 
-const char *create_link(char* first, char* middle, char* last)
+char *create_link(char* first, char* middle, char* last)
 {
     const char *strings[3] = {first, middle, last};
     return join_strings(strings, 3);
 }
 
-const char* create_arg(char* key, char* value)
+char *create_arg(char* key, char* value)
 {
     const char *strings[3] = {key, "=", value};
     return join_strings(strings, 3);
 }
 
-#include <time.h>
-
-char *get_current_date(void)
+char *stupid_strdup(const char *input)
 {
-    time_t unix_time;
-    time(&unix_time);
+    if (input)
+    {
+        return strdup(input);
+    }
 
-    struct tm *timeinfo;
-    timeinfo = localtime(&unix_time);
-
-    char *buffer = malloc(32);
-    strftime(buffer, 32, "%Y-%m-%d", timeinfo);
-
-    return buffer;
+    return NULL;
 }

@@ -28,16 +28,13 @@ static void quit_main(GSimpleAction *action, GVariant *parameter, gpointer ptr)
 
     quit_main_data *qmd = ptr;
 
-    logout_args *args = g_new(logout_args, 1);
+    logout_args args =
+    {
+        .address = qmd->gdata->address,
+        .token = qmd->gdata->token,
+    };
 
-    args->curl = qmd->gdata->curl;
-    args->address = qmd->gdata->address;
-    args->token = qmd->gdata->token;
-
-    curl_get_result *result = NULL;
-    pthread_t logout_thread;
-    pthread_create(&logout_thread, NULL, logout, args);
-    pthread_join(logout_thread, (void**) &result);
+    curl_get_result *result = logout(args);
 
     if (result->status == CURLE_OK)
     {
@@ -99,6 +96,8 @@ GtkWidget *create_main(GtkApplication *app, GtkWidget *stack, global_data *gdata
 
     gtk_widget_set_hexpand(box, TRUE);
     gtk_widget_set_vexpand(box, TRUE);
+    gtk_widget_set_hexpand(mv->stack, TRUE);
+    gtk_widget_set_vexpand(mv->stack, TRUE);
 
     return vbox;
 }
