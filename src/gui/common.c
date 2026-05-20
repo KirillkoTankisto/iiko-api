@@ -1,7 +1,4 @@
 #include "common.h"
-#include "glib.h"
-#include "gtk/gtk.h"
-#include "gtk/gtkcssprovider.h"
 
 const char *translations[LANG__COUNT][STR__COUNT] =
 {
