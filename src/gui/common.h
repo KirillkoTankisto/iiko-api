@@ -4,8 +4,6 @@
 #include <curl/curl.h>
 #include <gtk/gtk.h>
 
-#include "../api/api.h"
-
 typedef enum
 {
     STR_EMPTY,
@@ -45,14 +43,18 @@ extern const char *translations[LANG__COUNT][STR__COUNT];
 
 typedef struct
 {
-    const char *address;
-    const char *token;
+    GMutex lock;
+
+    char *address;
+    char *login;
+    char *password;
+    char *token;
     lang_id current_lang;
 } global_data;
 
 const char *translate(lang_id lang, str_id str);
 
-#define _(current_lang, string) translate(current_lang, string)
+#define _(current_lang, string) translations[current_lang][string]
 
 typedef struct
 {

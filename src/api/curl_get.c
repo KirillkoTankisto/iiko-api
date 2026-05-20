@@ -28,9 +28,8 @@ static size_t write_to_string(char *input, size_t size, size_t nmemb, void* outp
 static CURL *curl_init(void)
 {
     CURL *curl = curl_easy_init();
-    curl_easy_setopt(curl, CURLOPT_USERAGENT, "curl/");
+    curl_easy_setopt(curl, CURLOPT_USERAGENT, UAGENT);
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_to_string);
-
     return curl;
 }
 

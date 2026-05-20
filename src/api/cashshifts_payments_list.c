@@ -146,6 +146,7 @@ cashshifts_payments_list_answer *cashshifts_payments_list_get(cashshifts_payment
         if (cashless_records)   free(cashless_records);
         if (pay_in_records)     free(pay_in_records);
         if (pay_out_records)    free(pay_out_records);
+        return NULL;
     }
 
     answer->sessionId = stupid_strdup(json_object_get_string(sessionId));

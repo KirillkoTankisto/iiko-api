@@ -1,4 +1,5 @@
 #include "common.h"
+#include "../api/api.h"
 
 typedef struct
 {
@@ -35,16 +36,17 @@ static gboolean auth_thread_done(gpointer udata)
 
     if (result->status == CURLE_OK && result->text[0] != 0 && (unsigned char) result->text[0] != 0xd0)
     {
+        g_mutex_lock(&thread_args->gdata->lock);
         thread_args->gdata->address = thread_args->args.address;
+        thread_args->gdata->login = thread_args->args.login;
+        thread_args->gdata->password = thread_args->args.pass;
         thread_args->gdata->token = result->text;
+        g_mutex_unlock(&thread_args->gdata->lock);
 
         gtk_stack_set_visible_child_name(GTK_STACK(thread_args->stack), "main");
     }
 
     gtk_widget_set_sensitive(GTK_WIDGET(thread_args->button), TRUE);
-
-    g_free(thread_args->args.login);
-    g_free(thread_args->args.pass);
 
     g_free(thread_args);
 

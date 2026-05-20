@@ -1,5 +1,6 @@
 #include <gtk/gtk.h>
 #include "common.h"
+#include "../api/api.h"
 
 typedef struct
 {

@@ -53,11 +53,6 @@ const char *translations[LANG__COUNT][STR__COUNT] =
     }
 };
 
-const char *translate(lang_id lang, str_id str)
-{
-    return translations[lang][str];
-}
-
 static void set_date(GtkCalendar *calendar, gpointer udata)
 {
     calendar_popup *cp = udata;

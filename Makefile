@@ -2,7 +2,7 @@ SRC ?= src
 INC ?= $(shell pkg-config --cflags json-c libcurl gtk4 openssl)
 BUILD ?= build
 
-CC = clang
+CC ?= clang
 CFLAGS ?= -mtune=generic -O3 -pipe -Wall
 CLIBS = $(shell pkg-config --libs json-c libcurl gtk4 openssl)
 

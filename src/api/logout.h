@@ -2,7 +2,6 @@
 
 typedef struct
 {
-    CURL *curl;
     const char *address;
     const char *token;
 } logout_args;

@@ -2,6 +2,7 @@
 #define CURL_GET_H
 #include <curl/curl.h>
 
+#define UAGENT "iiko-office-unix/0.1"
 #define HTTPS "https://"
 
 typedef const char *cstring;
@@ -13,7 +14,7 @@ typedef struct
 
 typedef struct
 {
-    const char *text;
+    char *text;
     int status;
 } curl_get_result;
 

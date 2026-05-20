@@ -1,4 +1,5 @@
 #include "cashshifts.h"
+#include "../api/api.h"
 
 GtkWidget *create_sidebar_stack(global_data *gdata)
 {
@@ -19,33 +20,58 @@ GtkWidget *create_sidebar(GtkWidget *stack)
 typedef struct
 {
     GtkWidget *stack;
+    curl_get_result *result;
     global_data *gdata;
 } quit_main_data;
 
-static void quit_main(GSimpleAction *action, GVariant *parameter, gpointer ptr)
+static gboolean quit_main_thread_done(gpointer ptr)
 {
-    g_print("Quitting!\n");
+    quit_main_data *data = ptr;
 
-    quit_main_data *qmd = ptr;
-
-    logout_args args =
+    if (data->result->status == CURLE_OK && data->result->text && data->result->text[0] != 0)
     {
-        .address = qmd->gdata->address,
-        .token = qmd->gdata->token,
-    };
-
-    curl_get_result *result = logout(args);
-
-    if (result->status == CURLE_OK)
-    {
-        gtk_stack_set_visible_child_name(GTK_STACK(qmd->stack), "login");
+        g_print("Logout success\n");
     }
 
     else
     {
-        g_print("Something strange is about to happen...\n");
+        g_print("Logout failure\n");
     }
 
+    free(data->result->text);
+
+    g_mutex_lock(&data->gdata->lock);
+    g_free(data->gdata->address);
+    g_free(data->gdata->login);
+    g_free(data->gdata->password);
+    free(data->gdata->token);
+    g_mutex_unlock(&data->gdata->lock);
+
+    gtk_stack_set_visible_child_name(GTK_STACK(data->stack), "login");
+
+    g_free(data);
+
+    return G_SOURCE_REMOVE;
+}
+
+static gpointer quit_main_thread(gpointer ptr)
+{
+    quit_main_data *data = ptr;
+    logout_args args =
+    {
+        .address = data->gdata->address,
+        .token = data->gdata->token,
+    };
+
+    data->result = logout(args);
+    g_idle_add(quit_main_thread_done, ptr);
+
+    return NULL;
+}
+
+static void quit_main(GSimpleAction *action, GVariant *parameter, gpointer ptr)
+{
+    g_thread_unref(g_thread_new(NULL, quit_main_thread, ptr));
     return;
 }
 
@@ -97,7 +123,6 @@ GtkWidget *create_main(GtkApplication *app, GtkWidget *stack, global_data *gdata
     gtk_widget_set_hexpand(box, TRUE);
     gtk_widget_set_vexpand(box, TRUE);
     gtk_widget_set_hexpand(mv->stack, TRUE);
-    gtk_widget_set_vexpand(mv->stack, TRUE);
 
     return vbox;
 }
