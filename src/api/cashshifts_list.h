@@ -7,8 +7,8 @@ typedef struct
     const char *departmentId;
     const char *groupId;
     const char *status;
-    const int revision_from;
-} cashshifts_list;
+    int revision_from;
+} cashshifts_list_prompt;
 
 typedef struct
 {
@@ -48,7 +48,7 @@ typedef struct
 {
     const char *token;
     const char *address;
-    cashshifts_list prompt;
+    cashshifts_list_prompt prompt;
 } cashshifts_list_args;
 
 cashshifts_list_answer *cashshifts_list_get(cashshifts_list_args args);

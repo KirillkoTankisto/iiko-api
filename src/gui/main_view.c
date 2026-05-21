@@ -1,10 +1,11 @@
 #include "cashshifts.h"
 #include "../api/api.h"
+#include "common.h"
 
 GtkWidget *create_sidebar_stack(global_data *gdata)
 {
     GtkWidget *stack = gtk_stack_new();
-    gtk_stack_add_titled(GTK_STACK(stack), create_shifts(gdata), "shifts", _(gdata->current_lang, STR_CASHSHIFTS));
+    gtk_stack_add_titled(GTK_STACK(stack), create_cashshifts(gdata), "shifts", _(gdata->current_lang, STR_CASHSHIFTS));
     return stack;
 }
 
@@ -19,9 +20,10 @@ GtkWidget *create_sidebar(GtkWidget *stack)
 
 typedef struct
 {
+    global_data *gdata;
+
     GtkWidget *stack;
     curl_get_result *result;
-    global_data *gdata;
 } quit_main_data;
 
 static gboolean quit_main_thread_done(gpointer ptr)
@@ -38,18 +40,9 @@ static gboolean quit_main_thread_done(gpointer ptr)
         g_print("Logout failure\n");
     }
 
-    free(data->result->text);
-
-    g_mutex_lock(&data->gdata->lock);
-    g_free(data->gdata->address);
-    g_free(data->gdata->login);
-    g_free(data->gdata->password);
-    free(data->gdata->token);
-    g_mutex_unlock(&data->gdata->lock);
+    curl_get_cleanup(data->result);
 
     gtk_stack_set_visible_child_name(GTK_STACK(data->stack), "login");
-
-    g_free(data);
 
     return G_SOURCE_REMOVE;
 }
@@ -71,6 +64,9 @@ static gpointer quit_main_thread(gpointer ptr)
 
 static void quit_main(GSimpleAction *action, GVariant *parameter, gpointer ptr)
 {
+    (void) action;
+    (void) parameter;
+
     g_thread_unref(g_thread_new(NULL, quit_main_thread, ptr));
     return;
 }
@@ -99,7 +95,7 @@ static GtkWidget *create_menubar(GtkApplication *app, GtkWidget *stack, global_d
 
 typedef struct
 {
-    const char *token;
+    global_data *gdata;
 
     GtkWidget *stack;
     GtkWidget *sidebar;
@@ -110,6 +106,7 @@ GtkWidget *create_main(GtkApplication *app, GtkWidget *stack, global_data *gdata
     GtkWidget *box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, SPACING);
     main_view *mv = g_new(main_view, 1);
 
+    mv->gdata = gdata;
     mv->stack = create_sidebar_stack(gdata);
     mv->sidebar = create_sidebar(mv->stack);
     gtk_box_append(GTK_BOX(box), mv->sidebar);
@@ -123,6 +120,7 @@ GtkWidget *create_main(GtkApplication *app, GtkWidget *stack, global_data *gdata
     gtk_widget_set_hexpand(box, TRUE);
     gtk_widget_set_vexpand(box, TRUE);
     gtk_widget_set_hexpand(mv->stack, TRUE);
+    gtk_widget_set_vexpand(mv->stack, TRUE);
 
     return vbox;
 }

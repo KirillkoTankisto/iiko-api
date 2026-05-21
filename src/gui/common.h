@@ -49,7 +49,7 @@ typedef struct
     char *login;
     char *password;
     char *token;
-    lang_id current_lang;
+    const lang_id current_lang;
 } global_data;
 
 const char *translate(lang_id lang, str_id str);

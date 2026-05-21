@@ -70,6 +70,8 @@ static void set_date(GtkCalendar *calendar, gpointer udata)
 
 static void close_calendar(GtkButton *button, gpointer udata)
 {
+    (void) button;
+
     GtkWidget *popup = udata;
     gtk_popover_popdown(GTK_POPOVER(popup));
 

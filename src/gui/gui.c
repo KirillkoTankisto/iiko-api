@@ -29,24 +29,25 @@ static void activate(GtkApplication *app, gpointer gd)
     return;
 }
 
-int gui_start(int argc, char **argv)
+static global_data * global_data_init(void)
 {
     global_data *gdata = g_new(global_data, 1);
 
     const char *const *langs = g_get_language_names();
 
-    if (langs && langs[0] && strncmp(langs[0], "ru", 2) == 0)
-    {
-        gdata->current_lang = LANG_RU;
-    }
+    lang_id lang = (langs && langs[0] && strncmp(langs[0], "ru", 2) == 0) ? LANG_RU : LANG_EN;
 
-    else
-    {
-        gdata->current_lang = LANG_EN;
-    }
+    GMutex lock;
+    g_mutex_init(&lock);
 
-    gdata->address = NULL;
-    gdata->token = NULL;
+    memcpy(gdata, &(global_data) {.lock = lock, .address = NULL, .login = NULL, .password = NULL, .token = NULL, .current_lang = lang}, sizeof(global_data));
+
+    return gdata;
+}
+
+int gui_start(int argc, char **argv)
+{
+    global_data *gdata = global_data_init();
 
     g_autoptr(GtkApplication) app = gtk_application_new("org.iiko.office", G_APPLICATION_DEFAULT_FLAGS);
     g_signal_connect(app, "activate", G_CALLBACK(activate), gdata);

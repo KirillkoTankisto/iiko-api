@@ -20,4 +20,6 @@ typedef struct
 
 curl_get_result *curl_get(curl_get_args args);
 
+void curl_get_cleanup(curl_get_result *result);
+
 #endif

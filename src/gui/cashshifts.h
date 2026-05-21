@@ -1,3 +1,3 @@
 #include "common.h"
 
-GtkWidget *create_shifts(global_data *gdata);
+GtkWidget *create_cashshifts(global_data *gdata);

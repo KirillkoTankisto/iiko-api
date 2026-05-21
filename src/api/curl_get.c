@@ -60,3 +60,10 @@ curl_get_result *curl_get(curl_get_args args)
 
     return result;
 }
+
+void curl_get_cleanup(curl_get_result *result)
+{
+    free(result->text);
+    free(result);
+    return;
+}
